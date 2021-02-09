@@ -1,23 +1,28 @@
 const { Record, Performance } = require("../models");
 const readExcel = require("read-excel-file/node");
+const { ROE, Context, ROA, CAR, NPL, BOPO } = require("../helpers/strategy");
 
 class RecordController {
   static async addPerformance(records) {
-    let performances = [];
+    const roe = new Context(new ROE());
+    const roa = new Context(new ROA());
+    const car = new Context(new CAR());
+    const npl = new Context(new NPL());
+    const performances = [];
     records.forEach((record) => {
+      let kreditKols = [
+        record.kreditKol1,
+        record.kreditKol2,
+        record.kreditKol3,
+        record.kreditKol4,
+        record.kreditKol5,
+      ];
       let performance = {
         periode: record.periode,
-        NPL: (
-          (record.kreditKol3 + record.kreditKol4 + record.kreditKol5) /
-          (record.kreditKol1 +
-            record.kreditKol2 +
-            record.kreditKol3 +
-            record.kreditKol4 +
-            record.kreditKol5)
-        ).toPrecision(3),
-        ROE: (record.laba / record.modal).toPrecision(3),
-        ROA: (record.laba / record.totalAset).toPrecision(3),
-        CAR: (record.modal / record.atmr).toPrecision(3),
+        NPL: npl.calculate(kreditKols),
+        ROE: roe.calculate([record.laba, record.modal]),
+        ROA: roa.calculate([record.laba, record.totalAset]),
+        CAR: car.calculate([record.modal, record.atmr]),
         BOPO: (record.bo / record.po).toPrecision(3),
         LDR: (
           (record.kreditKol1 +
@@ -65,6 +70,23 @@ class RecordController {
     return await Performance.bulkCreate(performances);
   }
 
+  static validateRecord(data) {
+    if (data === null)
+      throw {
+        status: 400,
+        message: "Some fields are empty",
+      };
+    data = data.replace(/,/g, "");
+    if (isNaN(Number(data))) {
+      throw {
+        status: 400,
+        message: "Some fields are not number",
+      };
+    } else {
+      return Number(data);
+    }
+  }
+
   static async addRecord(req, res, next) {
     try {
       if (req.fileValidationError) {
@@ -78,24 +100,23 @@ class RecordController {
       rows.shift();
       rows.forEach((row) => {
         let periode = String(row[0]);
-        console.log(row, "<<<  periode");
         periode =
           periode.substring(0, 4) + "-" + periode.substring(4, periode.length);
         let record = {
           periode: periode,
           sandiBank: row[1],
-          kreditKol1: Number(row[2].replace(/,/g, "")),
-          kreditKol2: Number(row[3].replace(/,/g, "")),
-          kreditKol3: Number(row[4].replace(/,/g, "")),
-          kreditKol4: Number(row[5].replace(/,/g, "")),
-          kreditKol5: Number(row[6].replace(/,/g, "")),
-          laba: Number(row[7].replace(/,/g, "")),
-          modal: Number(row[8].replace(/,/g, "")),
-          totalAset: Number(row[9].replace(/,/g, "")),
-          atmr: Number(row[10].replace(/,/g, "")),
-          bo: Number(row[11].replace(/,/g, "")),
-          po: Number(row[12].replace(/,/g, "")),
-          dpk: Number(row[13].replace(/,/g, "")),
+          kreditKol1: RecordController.validateRecord(row[2]),
+          kreditKol2: RecordController.validateRecord(row[3]),
+          kreditKol3: RecordController.validateRecord(row[4]),
+          kreditKol4: RecordController.validateRecord(row[5]),
+          kreditKol5: RecordController.validateRecord(row[6]),
+          laba: RecordController.validateRecord(row[7]),
+          modal: RecordController.validateRecord(row[8]),
+          totalAset: RecordController.validateRecord(row[9]),
+          atmr: RecordController.validateRecord(row[10]),
+          bo: RecordController.validateRecord(row[11]),
+          po: RecordController.validateRecord(row[12]),
+          dpk: RecordController.validateRecord(row[13]),
         };
         records.push(record);
       });
@@ -103,7 +124,6 @@ class RecordController {
       const response2 = await RecordController.addPerformance(records);
       res.status(201).json({ message: "Data Succesfully Added" });
     } catch (error) {
-      console.log(error, "<<<error");
       if (error.message) {
         res.status(error.status).json({ message: error.message });
       }

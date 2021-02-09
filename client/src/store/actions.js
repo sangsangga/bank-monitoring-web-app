@@ -16,7 +16,10 @@ export function postData(payload) {
       });
       MySwal.fire(response.data.message);
     } catch (error) {
-      MySwal.fire(error.response.data.message);
+      MySwal.fire({
+        icon: "error",
+        text: error.response.data.message,
+      });
     }
   };
 }

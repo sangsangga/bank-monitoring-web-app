@@ -79,11 +79,13 @@ function ShowPerformance() {
         >
           <thead>
             <tr>
+              <th>Periode</th>
               <th>NPL</th>
               <th>ROA</th>
               <th>ROE</th>
               <th>LDR</th>
               <th>BOPO</th>
+              <th>CAR</th>
               <th>Kr</th>
               <th>Pr</th>
               <th>Lk</th>
@@ -96,11 +98,13 @@ function ShowPerformance() {
             {filtered.map((item) => {
               return (
                 <tr>
+                  <td>{item.periode}</td>
                   <td>{item.NPL}%</td>
                   <td>{item.ROA}%</td>
                   <td>{item.ROE}%</td>
                   <td>{item.LDR}%</td>
                   <td>{item.BOPO}%</td>
+                  <td>{item.CAR}%</td>
                   <td
                     style={{
                       backgroundColor: item.Kr === "merah" ? "red" : "green",

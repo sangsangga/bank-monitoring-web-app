@@ -1,63 +1,63 @@
-'use strict';
+"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Performances', {
+    await queryInterface.createTable("Performances", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       periode: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       NPL: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       ROE: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       ROA: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       LDR: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       BOPO: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       CAR: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       Kr: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       Pr: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       Lk: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       Ef: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       Re: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       Komposit: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Performances');
-  }
+    await queryInterface.dropTable("Performances");
+  },
 };

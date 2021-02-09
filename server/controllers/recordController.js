@@ -7,24 +7,26 @@ class RecordController {
     records.forEach((record) => {
       let performance = {
         periode: record.periode,
-        NPL:
+        NPL: (
           (record.kreditKol3 + record.kreditKol4 + record.kreditKol5) /
           (record.kreditKol1 +
             record.kreditKol2 +
             record.kreditKol3 +
             record.kreditKol4 +
-            record.kreditKol5),
-        ROE: record.laba / record.modal,
-        ROA: record.laba / record.totalAset,
-        CAR: record.modal / record.atmr,
-        BOPO: record.bo / record.po,
-        LDR:
+            record.kreditKol5)
+        ).toPrecision(3),
+        ROE: (record.laba / record.modal).toPrecision(3),
+        ROA: (record.laba / record.totalAset).toPrecision(3),
+        CAR: (record.modal / record.atmr).toPrecision(3),
+        BOPO: (record.bo / record.po).toPrecision(3),
+        LDR: (
           (record.kreditKol1 +
             record.kreditKol2 +
             record.kreditKol3 +
             record.kreditKol4 +
             record.kreditKol5) /
-          record.dpk,
+          record.dpk
+        ).toPrecision(3),
       };
 
       performance.Kr = performance.NPL > 5 ? "merah" : "hijau";
@@ -65,6 +67,12 @@ class RecordController {
 
   static async addRecord(req, res, next) {
     try {
+      if (req.fileValidationError) {
+        throw {
+          status: 400,
+          message: req.fileValidationError,
+        };
+      }
       const rows = await readExcel("./" + req.file.path);
       const records = [];
       rows.shift();
@@ -89,13 +97,16 @@ class RecordController {
           po: Number(row[12].replace(/,/g, "")),
           dpk: Number(row[13].replace(/,/g, "")),
         };
-        console.log(record, "<<< record");
         records.push(record);
       });
       const response = await Record.bulkCreate(records);
       const response2 = await RecordController.addPerformance(records);
+      res.status(201).json({ message: "Data Succesfully Added" });
     } catch (error) {
-      console.log(error);
+      console.log(error, "<<<error");
+      if (error.message) {
+        res.status(error.status).json({ message: error.message });
+      }
     }
   }
 
